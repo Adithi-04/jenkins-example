@@ -171,7 +171,7 @@ directory = '/Users/adithi/Desktop/jenkins_folder_2'
 contents = os.listdir(directory)
 newdir = 'Users/adithi/Desktop/jenkins_output_folder_2'
 # os.mkdir(newdir)
-output_log = open('Users/adithi/Desktop/Output.txt','a')
+output_log = open('/Users/adithi/Desktop/Output.txt','a')
 file_no = 0
 for item in contents:
     if item == '.DS_Store':
