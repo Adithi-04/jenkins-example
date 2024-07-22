@@ -167,11 +167,11 @@ def convert_rtf(item,file_no):
     output_log.write(f"Data successfully written to {output_file}\n")
 
 
-directory = '/Users/shreejakatama/Downloads/Internship/Folder Code/T3'
+directory = '/Users/adithi/Desktop/jenkins_folder_2'
 contents = os.listdir(directory)
-newdir = '/Users/shreejakatama/Downloads/Internship/Folder Code/Output_T3'
+newdir = 'Users/adithi/Desktop/jenkins_output_folder_2'
 # os.mkdir(newdir)
-output_log = open('/Users/shreejakatama/Downloads/Internship/Folder Code/Output.txt','a')
+output_log = open('Users/adithi/Desktop/Output.txt','a')
 file_no = 0
 for item in contents:
     if item == '.DS_Store':
