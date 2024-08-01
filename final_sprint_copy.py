@@ -53,14 +53,13 @@ def check_rtf(file_path):
 
     with open(file_path, 'r') as file:
         rtf_content = file.read().replace("{\\line}\n", " ").replace("\\~", " ")
-    
     rtf_tags = ['\\fonttbl','\\endnhere','\\header','\\cell','\\trowd','\\row'] # Commonly used RTF tags
     flag = True
     for i in rtf_tags:
         if i in rtf_content:
             continue
         else:
-            print(i," not in rtf") # If RTF tag is not present, the RTF does not adhere to the schema 
+            print(i," not in rtf") #RTF does not adhere to the schema 
             flag = False
         break
     if flag:
@@ -71,13 +70,11 @@ def check_rtf(file_path):
 
 # Function to extract font details from RTF content
 def extract_font_details(rtf_content):
-
     # Extract font table
     font_table_pattern = re.compile(r'{\\fonttbl(.*)}', re.DOTALL) 
     font_table_match = font_table_pattern.search(rtf_content)
     if font_table_match:
         font_table = font_table_match.group(1)
-
     else:
         debug_print("No font table found")
         return {}
@@ -90,7 +87,6 @@ def extract_font_details(rtf_content):
         font_id, font_name = match.groups()
         fonts['f'+font_id] = font_name    
     return fonts
-
 # Function to extract page breaks in the RTF File
 def extract_page_breaks(rtf_content):
     page_breaks = []
@@ -124,7 +120,6 @@ def extract_header(page_content):
             header[h] = header[h].replace('{\\field{\\*\\fldinst { PAGE }}}{',str(PAGE)).replace('}{\\field{\\*\\fldinst { NUMPAGES }}}',str(NUMPAGES))
         # debug_print(f"Extracted header: {header}")
         debug_print("Header extracted successfully")
-
     except:
         debug_print("Header not found")
     return header, page_content[header_end+1:]
@@ -137,8 +132,7 @@ def extract_title(page_content):
         for t in re.finditer(r'\\trhdr' , page_content) :
             trhdr.append(t.start())
         for e in re.finditer(r'{\\row}' , page_content) :
-            end_row.append(e.end())
-        
+            end_row.append(e.end())      
         title = []
         for i in range(len(trhdr)-1):
             title_line = re.search(r'{(.+)\\cell}' , page_content[trhdr[i]:end_row[i]]).group()[1:-6]
@@ -150,7 +144,6 @@ def extract_title(page_content):
             return title, page_content[end_row[len(trhdr)-2]+1:]
         else:
             return title, page_content[trhdr[0]:]
-
     except:
         debug_print("No title found")
  
@@ -158,7 +151,6 @@ def extract_title(page_content):
 def extract_column_headers(page_content):
     try:
         end_row = re.search(r'{\\row}', page_content).end()
-
         headers = re.findall(r'{(.+)\\cell}' , page_content[:end_row])
         column_headers = [re.sub(r"\\(\w+)", "", h).strip() for h in headers]
         # debug_print(f"Column Headers found: {column_headers}")
@@ -177,7 +169,6 @@ def extract_table_data(page_content, column_headers):
             trowd.append(t.start())
         for e in re.finditer(r'{\\row}' , page_content) :
             end_row.append(e.end())
-
         subjects = []
         Iter = len(trowd)
         if re.search(r'\\keepn', page_content[trowd[-1]:end_row[-1]]):
@@ -237,44 +228,35 @@ def extract_page_content(page_content):
 # Function to convert an rtf file to json
 def convert_rtf(item, file_no, output_directory):
     debug_print(f"Converting file {file_no}: {item}")
-
     try:
       # Extract rtf content as a string in python
         with open(item, 'r') as file:
             rtf_content = file.read().replace("{\\line}\n", " ").replace("\\~", " ")
             debug_print(f"RTF content loaded for file {file_no}")
-
         fonts = extract_font_details(rtf_content)
         debug_print(f"Fonts extracted: {fonts}")
-
         dict1 = {}
         data = []
         dict1['fonts'] = fonts
         dict1['data'] = data
-
         page_breaks = extract_page_breaks(rtf_content)
         # debug_print(f"Page breaks found: {page_breaks}")
 
         global PAGE
         PAGE = 0
         global NUMPAGES
-        NUMPAGES = rtf_content.count("NUMPAGES")
-        
+        NUMPAGES = rtf_content.count("NUMPAGES")      
         for i in range(len(page_breaks)-1) :
 
             page_content = rtf_content[page_breaks[i] : page_breaks[i+1]]
             debug_print(f"Processing page {PAGE + 1}")
-
             page_details = extract_page_content(page_content)
-
-            data.append(page_details)
-        
+            data.append(page_details)       
         output_file = os.path.join(output_directory, f"{os.path.splitext(os.path.basename(item))[0]}.json")
         with open(output_file, 'w') as f:
             json.dump(dict1, f, indent=4)
         debug_print(f"JSON file successfully created")
-        return "Successful"
-    
+        return "Successful"    
     except Exception as e:
         debug_print("Error, cannot be converted due to" + str(e))
         return "Failed"
@@ -291,10 +273,8 @@ def process_files(folder_path):
     global output_directory, folder_to_delete  # Declare as global variables
     for row in table.get_children():
         table.delete(row)
-
     if not folder_path:
         return
-
     files = os.listdir(folder_path)
     output_directory = os.path.join(folder_path, 'Output')
     folder_to_delete = output_directory  # Assign the output directory to folder_to_delete
@@ -321,12 +301,10 @@ def process_files(folder_path):
             status = "Failed"
             remarks = "No remarks Found"
             color = 'red'
-
         table.insert("", "end", values=(file, status, remarks), tags=(color,))
 
 def on_continue():
     messagebox.showinfo("Info", "Continue button clicked!")
-
 
 def on_delete():
     for row in table.get_children():
@@ -360,7 +338,6 @@ def user_interface():
     table.heading("Status", text="Status")
     table.heading("Remarks", text="Remarks")
     table.place(relx=0.5, rely=0.57, anchor=tk.CENTER, relwidth=0.8, relheight=0.55)
-
     table.tag_configure('green', background='lightgreen')
     table.tag_configure('red', background='lightcoral')
 
@@ -385,9 +362,6 @@ if __name__ == "__main__" :
         user_interface()
     except:
         debug_print("UI unsuccessful")
-
-
-
 
 #TEST FUNCTIONS
 
